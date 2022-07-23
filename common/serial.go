@@ -5,6 +5,16 @@ import (
 	"encoding/gob"
 )
 
+// Serializable is an interface for types that can
+// be encoded to and decoded from a stream of bytes.
+type Serializable interface {
+	// Serialize converts the object into a stream of bytes
+	Serialize() ([]byte, error)
+
+	// Deserialize converts a stream of bytes into the object
+	Deserialize([]byte) error
+}
+
 // GobEncode encodes an object into a gob encoded stream of bytes.
 // Returns an error if the gob encoder fails
 func GobEncode(object any) ([]byte, error) {

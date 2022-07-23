@@ -34,9 +34,9 @@ func (header *BlockHeader) Mint(height int64) common.Hash {
 
 	for header.Nonce < math.MaxInt64 {
 		// Serialize the Header
-		data, err := common.GobEncode(header)
+		data, err := header.Serialize()
 		if err != nil {
-			log.Fatalln("Gob Encode for BlockHeader failed during PoW:", err)
+			log.Fatalln("BlockHeader serialization failed during PoW:", err)
 		}
 
 		// Hash the Header data
@@ -66,9 +66,9 @@ func (header *BlockHeader) Validate() bool {
 	var bigHash big.Int
 
 	// Serialize the Header
-	data, err := common.GobEncode(header)
+	data, err := header.Serialize()
 	if err != nil {
-		log.Fatalln("Gob Encode for BlockHeader failed during PoW:", err)
+		log.Fatalln("BlockHeader serialization failed during PoW:", err)
 	}
 
 	// Hash the Header data

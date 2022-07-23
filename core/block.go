@@ -20,14 +20,14 @@ type Block struct {
 }
 
 // String implements the Stringer interface for Block
-func (b *Block) String() string {
+func (block *Block) String() string {
 	var s strings.Builder
 
-	s.WriteString(fmt.Sprintf("Block Hash: %x\n", b.BlockHash))
-	s.WriteString(fmt.Sprintf("Priori Hash: %x\n", b.BlockHeader.Priori))
-	s.WriteString(fmt.Sprintf("Data: %v\n", string(b.BlockData)))
-	s.WriteString(fmt.Sprintf("Timestamp: %v\n", b.BlockHeader.Timestamp))
-	s.WriteString(fmt.Sprintf("Nonce: %v\n", b.BlockHeader.Nonce))
+	s.WriteString(fmt.Sprintf("Block Hash: %x\n", block.BlockHash))
+	s.WriteString(fmt.Sprintf("Priori Hash: %x\n", block.BlockHeader.Priori))
+	s.WriteString(fmt.Sprintf("Data: %v\n", string(block.BlockData)))
+	s.WriteString(fmt.Sprintf("Timestamp: %v\n", block.BlockHeader.Timestamp))
+	s.WriteString(fmt.Sprintf("Nonce: %v\n", block.BlockHeader.Nonce))
 
 	return s.String()
 }
@@ -50,4 +50,25 @@ func NewBlock(data string, priori []byte, height int64) *Block {
 	block.BlockHash = block.BlockHeader.Mint(height)
 
 	return block
+}
+
+// Serialize implements the common.Serializable interface for Block.
+// Converts the Block into a stream of bytes encoded using common.GobEncode.
+func (block *Block) Serialize() ([]byte, error) {
+	return common.GobEncode(block)
+}
+
+// Deserialize implements the common.Serializable interface for Block.
+// Converts the given data into Block and sets it the method's receiver using common.GobDecode.
+func (block *Block) Deserialize(data []byte) error {
+	// Decode the data into a *Block
+	object, err := common.GobDecode(data, new(Block))
+	if err != nil {
+		return err
+	}
+
+	// Cast the object into a *Block and
+	// set it to the method receiver
+	*block = *object.(*Block)
+	return nil
 }

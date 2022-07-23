@@ -34,3 +34,24 @@ func NewBlockHeader(priori, summary common.Hash) BlockHeader {
 		0,
 	}
 }
+
+// Serialize implements the common.Serializable interface for BlockHeader.
+// Converts the BlockHeader into a stream of bytes encoded using common.GobEncode.
+func (header *BlockHeader) Serialize() ([]byte, error) {
+	return common.GobEncode(header)
+}
+
+// Deserialize implements the common.Serializable interface for BlockHeader.
+// Converts the given data into BlockHeader and sets it the method's receiver using common.GobDecode.
+func (header *BlockHeader) Deserialize(data []byte) error {
+	// Decode the data into a *BlockHeader
+	object, err := common.GobDecode(data, new(BlockHeader))
+	if err != nil {
+		return err
+	}
+
+	// Cast the object into a *BlockHeader
+	// and set it to the method receiver
+	*header = *object.(*BlockHeader)
+	return nil
+}
