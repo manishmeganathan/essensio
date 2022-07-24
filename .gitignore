@@ -14,5 +14,12 @@
 # Dependency directories (remove the comment below to include it)
 # vendor/
 
+# Ignore IDE Settings
 .idea/
+
+# Database Directory and Files
 data/
+.DS_Store
+
+# Build Artifacts
+essensio
