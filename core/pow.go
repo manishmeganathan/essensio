@@ -25,7 +25,7 @@ func GenerateTarget() *big.Int {
 
 // Mint is the Proof of Work routine that generates a nonce
 // that is valid for the Target difficulty of the header.
-func (header *BlockHeader) Mint(height int64) common.Hash {
+func (header *BlockHeader) Mint() common.Hash {
 	var hash []byte
 	var bigHash big.Int
 
@@ -36,27 +36,26 @@ func (header *BlockHeader) Mint(height int64) common.Hash {
 		// Serialize the Header
 		data, err := header.Serialize()
 		if err != nil {
-			log.Fatalln("BlockHeader serialization failed during PoW:", err)
+			log.Fatalln("header serialization failed during PoW:", err)
 		}
 
 		// Hash the Header data
 		hash = common.Hash256(data)
 		bigHash.SetBytes(hash)
 
-		fmt.Printf("\rBlock %v: %x", height, hash)
+		// Print the hash mining process
+		fmt.Printf("\rMining Block [%v]: %x", header.Nonce, hash)
 
 		// Compare the hash with target
 		if bigHash.Cmp(header.Target) == -1 {
-			// Block Mined!
-			fmt.Printf(" [%v]\n", header.Nonce)
-
-			break
+			break // Block Mined!
 		} else {
 			// Increment Nonce & Repeat
 			header.Nonce++
 		}
 	}
 
+	fmt.Println()
 	return hash
 }
 
@@ -68,7 +67,7 @@ func (header *BlockHeader) Validate() bool {
 	// Serialize the Header
 	data, err := header.Serialize()
 	if err != nil {
-		log.Fatalln("BlockHeader serialization failed during PoW:", err)
+		log.Fatalln("header serialization failed during PoW:", err)
 	}
 
 	// Hash the Header data

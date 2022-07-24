@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/manishmeganathan/essensio/common"
 )
@@ -23,11 +24,12 @@ type Block struct {
 func (block *Block) String() string {
 	var s strings.Builder
 
-	s.WriteString(fmt.Sprintf("Block Hash: %x\n", block.BlockHash))
-	s.WriteString(fmt.Sprintf("Priori Hash: %x\n", block.BlockHeader.Priori))
+	s.WriteString(fmt.Sprintf("=======[%v][%v]\n", block.BlockHeight, time.Unix(block.Timestamp, 0)))
+	s.WriteString(fmt.Sprintf("Block Hash: 0x%x\n", block.BlockHash))
+	s.WriteString(fmt.Sprintf("Priori Hash: 0x%x\n", block.Priori))
 	s.WriteString(fmt.Sprintf("Data: %v\n", string(block.BlockData)))
-	s.WriteString(fmt.Sprintf("Timestamp: %v\n", block.BlockHeader.Timestamp))
-	s.WriteString(fmt.Sprintf("Nonce: %v\n", block.BlockHeader.Nonce))
+	s.WriteString(fmt.Sprintf("Nonce: %v\n", block.Nonce))
+	s.WriteString("=========================================\n")
 
 	return s.String()
 }
@@ -47,7 +49,7 @@ func NewBlock(data string, priori []byte, height int64) *Block {
 	block.BlockHeader = header
 
 	// Mine the Block & set the block hash
-	block.BlockHash = block.BlockHeader.Mint(height)
+	block.BlockHash = block.BlockHeader.Mint()
 
 	return block
 }
