@@ -1,9 +1,10 @@
-package core
+package chainmgr
 
 import (
 	"fmt"
 
 	"github.com/manishmeganathan/essensio/common"
+	"github.com/manishmeganathan/essensio/core"
 	"github.com/manishmeganathan/essensio/db"
 )
 
@@ -12,8 +13,8 @@ var (
 	ChainHeightKey = []byte("state-chainheight")
 )
 
-// BlockChain represents a blockchain as a set of Blocks
-type BlockChain struct {
+// ChainManager represents a blockchain as a set of Blocks
+type ChainManager struct {
 	// Represents the database of blockchain data
 	// This contains the state and blocks of the blockchain
 	db *db.Database
@@ -25,15 +26,15 @@ type BlockChain struct {
 }
 
 // String implements the Stringer interface for BlockChain
-func (chain *BlockChain) String() string {
+func (chain *ChainManager) String() string {
 	return fmt.Sprintf("Chain Head: %x || Chain Height: %v", chain.head, chain.height)
 }
 
 // AddBlock generates and appends a Block to the chain for a given string data.
 // The generated block is stored in the database. Any error that occurs is returned.
-func (chain *BlockChain) AddBlock(data string) error {
+func (chain *ChainManager) AddBlock(data string) error {
 	// Create a new Block with the given data
-	block := NewBlock(data, chain.head, chain.height)
+	block := core.NewBlock(data, chain.head, chain.height)
 
 	// Serialize the Block
 	blockData, err := block.Serialize()
@@ -58,11 +59,11 @@ func (chain *BlockChain) AddBlock(data string) error {
 	return nil
 }
 
-// NewBlockChain returns a new BlockChain with an initialized
+// NewChainManager returns a new BlockChain with an initialized
 // Genesis Block with the provided genesis data.
-func NewBlockChain() (*BlockChain, error) {
-	// Create a new BlockChain object
-	chain := new(BlockChain)
+func NewChainManager() (*ChainManager, error) {
+	// Create a new ChainManager object
+	chain := new(ChainManager)
 
 	// Check if the database already exists
 	if db.Exists() {
@@ -81,9 +82,9 @@ func NewBlockChain() (*BlockChain, error) {
 	return chain, nil
 }
 
-// load restarts an existing BlockChain from the database.
+// load restarts a ChainManager from the database.
 // It updates its in-memory chain state chain information from the DB.
-func (chain *BlockChain) load() (err error) {
+func (chain *ChainManager) load() (err error) {
 	// Open the database
 	if chain.db, err = db.Open(); err != nil {
 		return err
@@ -111,9 +112,9 @@ func (chain *BlockChain) load() (err error) {
 	return nil
 }
 
-// init initializes a new BlockChain in the database.
+// init initializes a new chain in the database.
 // It generates a Genesis Block and adds it to DB and updates all chain state data.
-func (chain *BlockChain) init() (err error) {
+func (chain *ChainManager) init() (err error) {
 	// Open the database
 	if chain.db, err = db.Open(); err != nil {
 		return err
@@ -122,7 +123,7 @@ func (chain *BlockChain) init() (err error) {
 	fmt.Println(">>>> New Blockchain Initialization. Creating Genesis Block <<<<")
 
 	// Create Genesis Block & serialize it
-	genesisBlock := NewBlock("genesis", []byte{}, 0)
+	genesisBlock := core.NewBlock("genesis", []byte{}, 0)
 	genesisData, err := genesisBlock.Serialize()
 	if err != nil {
 		return fmt.Errorf("block serialize failed: %w", err)
@@ -144,9 +145,13 @@ func (chain *BlockChain) init() (err error) {
 	return nil
 }
 
+func (chain *ChainManager) Stop() {
+	chain.db.Close()
+}
+
 // syncState updates the chain head and height values into the DB at keys
 // specified by the ChainHeadKey and ChainHeightKey respectively.
-func (chain *BlockChain) syncState() error {
+func (chain *ChainManager) syncState() error {
 	// Sync chain head into the DB
 	if err := chain.db.SetEntry(ChainHeadKey, chain.head); err != nil {
 		return fmt.Errorf("error syncing chain head: %w", err)

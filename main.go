@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/manishmeganathan/essensio/core"
+	"github.com/manishmeganathan/essensio/core/chainmgr"
 )
 
 func main() {
@@ -24,10 +24,12 @@ func main() {
 		}
 
 		// Load up the BlockChain
-		chain, err := core.NewBlockChain()
+		chain, err := chainmgr.NewChainManager()
 		if err != nil {
 			log.Fatalln("Failed to Start Blockchain:", err)
 		}
+
+		defer chain.Stop()
 
 		// Add the Block with the given data to the chain
 		if err := chain.AddBlock(os.Args[2]); err != nil {
@@ -37,10 +39,12 @@ func main() {
 	// ShowChain command
 	case "showchain":
 		// Load up the BlockChain
-		chain, err := core.NewBlockChain()
+		chain, err := chainmgr.NewChainManager()
 		if err != nil {
 			log.Fatalln("Failed to Start Blockchain:", err)
 		}
+
+		defer chain.Stop()
 
 		// Create a new iterator for the chain
 		iterator := chain.NewIterator()
