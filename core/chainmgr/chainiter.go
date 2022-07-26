@@ -26,7 +26,7 @@ func (chain *ChainManager) NewIterator() *ChainIterator {
 // Returns an error if a Block is not found or is invalid.
 func (iter *ChainIterator) Next() (*core.Block, error) {
 	// Find the Block with hash represented by the iterator cursor
-	data, err := iter.database.GetEntry(iter.cursor)
+	data, err := iter.database.GetEntry(iter.cursor.Bytes())
 	if err != nil {
 		return nil, fmt.Errorf("cannot finding block '%x': %w", iter.cursor, err)
 	}
@@ -45,6 +45,6 @@ func (iter *ChainIterator) Next() (*core.Block, error) {
 // Done returns whether the ChainIterator has
 // reached the Genesis Block of the chain.
 func (iter *ChainIterator) Done() bool {
-	// If the cursor hash is nil or empty bytes, the ChainIterator is done
-	return len(iter.cursor) == 0
+	// If the cursor hash is null, the ChainIterator is done
+	return iter.cursor == common.NullHash()
 }

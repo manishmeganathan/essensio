@@ -26,8 +26,7 @@ func GenerateTarget() *big.Int {
 // Mint is the Proof of Work routine that generates a nonce
 // that is valid for the Target difficulty of the header.
 func (header *BlockHeader) Mint() common.Hash {
-	var hash []byte
-	var bigHash big.Int
+	var hash common.Hash
 
 	// Reset Nonce
 	header.Nonce = 0
@@ -41,13 +40,12 @@ func (header *BlockHeader) Mint() common.Hash {
 
 		// Hash the Header data
 		hash = common.Hash256(data)
-		bigHash.SetBytes(hash)
 
 		// Print the hash mining process
 		fmt.Printf("\rMining Block [%v]: %x", header.Nonce, hash)
 
 		// Compare the hash with target
-		if bigHash.Cmp(header.Target) == -1 {
+		if hash.Big().Cmp(header.Target) == -1 {
 			break // Block Mined!
 		} else {
 			// Increment Nonce & Repeat
@@ -62,8 +60,6 @@ func (header *BlockHeader) Mint() common.Hash {
 // Validate is the Proof of Work validation routine.
 // Returns a boolean indicating if the hash of the block is valid for its target.
 func (header *BlockHeader) Validate() bool {
-	var bigHash big.Int
-
 	// Serialize the Header
 	data, err := header.Serialize()
 	if err != nil {
@@ -72,8 +68,7 @@ func (header *BlockHeader) Validate() bool {
 
 	// Hash the Header data
 	hash := common.Hash256(data)
-	bigHash.SetBytes(hash)
 
 	// Compare hash with target
-	return bigHash.Cmp(header.Target) == -1
+	return hash.Big().Cmp(header.Target) == -1
 }

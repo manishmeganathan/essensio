@@ -43,7 +43,7 @@ func (chain *ChainManager) AddBlock(data string) error {
 	}
 
 	// Add block to db
-	if err := chain.db.SetEntry(block.BlockHash, blockData); err != nil {
+	if err := chain.db.SetEntry(block.BlockHash.Bytes(), blockData); err != nil {
 		return fmt.Errorf("block store to db failed: %w", err)
 	}
 
@@ -91,7 +91,8 @@ func (chain *ChainManager) load() (err error) {
 	}
 
 	// Get the chain head and set it
-	if chain.head, err = chain.db.GetEntry(ChainHeadKey); err != nil {
+	head, err := chain.db.GetEntry(ChainHeadKey)
+	if err != nil {
 		return fmt.Errorf("chain head retrieve failed: %w", err)
 	}
 
@@ -109,6 +110,9 @@ func (chain *ChainManager) load() (err error) {
 
 	// Cast the object into an int64 and set it
 	chain.height = *object.(*int64)
+	// Convert the head bytes into a Hash and set it
+	chain.head = common.BytesToHash(head)
+
 	return nil
 }
 
@@ -123,14 +127,14 @@ func (chain *ChainManager) init() (err error) {
 	fmt.Println(">>>> New Blockchain Initialization. Creating Genesis Block <<<<")
 
 	// Create Genesis Block & serialize it
-	genesisBlock := core.NewBlock("genesis", []byte{}, 0)
+	genesisBlock := core.NewBlock("genesis", common.NullHash(), 0)
 	genesisData, err := genesisBlock.Serialize()
 	if err != nil {
 		return fmt.Errorf("block serialize failed: %w", err)
 	}
 
 	// Add Genesis Block to DB
-	if err := chain.db.SetEntry(genesisBlock.BlockHash, genesisData); err != nil {
+	if err := chain.db.SetEntry(genesisBlock.BlockHash.Bytes(), genesisData); err != nil {
 		return fmt.Errorf("genesis block store to db failed: %w", err)
 	}
 
@@ -153,7 +157,7 @@ func (chain *ChainManager) Stop() {
 // specified by the ChainHeadKey and ChainHeightKey respectively.
 func (chain *ChainManager) syncState() error {
 	// Sync chain head into the DB
-	if err := chain.db.SetEntry(ChainHeadKey, chain.head); err != nil {
+	if err := chain.db.SetEntry(ChainHeadKey, chain.head.Bytes()); err != nil {
 		return fmt.Errorf("error syncing chain head: %w", err)
 	}
 

@@ -36,7 +36,7 @@ func (block *Block) String() string {
 
 // NewBlock generates a new Block for some given data,
 // the hash of the previous block and the block height
-func NewBlock(data string, priori []byte, height int64) *Block {
+func NewBlock(data string, priori common.Hash, height int64) *Block {
 	block := &Block{
 		BlockData:   []byte(data),
 		BlockHeight: height,
