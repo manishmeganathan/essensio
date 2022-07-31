@@ -16,13 +16,21 @@ type ShowChainResult struct {
 
 type ChainBlock struct {
 	Height    uint64 `json:"height"`
+	Nonce     uint64 `json:"nonce"`
 	Timestamp string `json:"timestamp"`
 
 	BlockHash     string `json:"block_hash"`
 	PrevBlockHash string `json:"prev_block_hash"`
 
+	TxnCount     int                `json:"txn_count"`
+	Transactions []BlockTransaction `json:"transactions"`
+}
+
+type BlockTransaction struct {
+	To    string `json:"to"`
+	From  string `json:"from"`
+	Value uint64 `json:"value"`
 	Nonce uint64 `json:"nonce"`
-	Data  string `json:"data"`
 }
 
 func (api *API) ShowChain(r *http.Request, args *ShowChainArgs, result *ShowChainResult) error {
@@ -41,13 +49,22 @@ func (api *API) ShowChain(r *http.Request, args *ShowChainArgs, result *ShowChai
 			log.Fatalln("Iterator Error:", err)
 		}
 
+		transactions := make([]BlockTransaction, 0, block.TxnCount())
+		for _, txn := range block.BlockTxns {
+			transactions = append(transactions, BlockTransaction{
+				string(txn.To), string(txn.From),
+				txn.Value, txn.Nonce,
+			})
+		}
+
 		chainresult.Blocks = append(chainresult.Blocks, ChainBlock{
 			Height:        uint64(block.BlockHeight),
 			Timestamp:     time.Unix(block.Timestamp, 0).Format(time.RFC3339),
 			BlockHash:     block.BlockHash.Hex(),
 			PrevBlockHash: block.Priori.Hex(),
 			Nonce:         uint64(block.Nonce),
-			Data:          string(block.BlockData),
+			Transactions:  transactions,
+			TxnCount:      block.TxnCount(),
 		})
 	}
 
