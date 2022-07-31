@@ -9,16 +9,21 @@ import (
 	"github.com/manishmeganathan/essensio/common"
 )
 
-// Difficulty represents the number of bits that need to be 0 for the Proof Of Work Algorithm.
-// Currently Static, but can eventually be adjusted based on the total hash rate of the network,
-// to achieve a block time of n minutes.
-const Difficulty uint8 = 18
+const (
+	// BlockDifficulty represents the number of bits that need to be 0 for the Proof Of Work Algorithm.
+	// Currently static, but can eventually be adjusted based on the total hash rate of the network.
+	BlockDifficulty uint8 = 18
+
+	// BlockReward represents the standard reward for mining a Block
+	// The default block reward is 5 Essences or 1 Quintessence
+	BlockReward = common.Quintessence
+)
 
 // GenerateTarget returns a big.Int with the target hash value for the current difficulty
 func GenerateTarget() *big.Int {
 	// Generate a new big Integer and left shift to match difficulty
 	target := big.NewInt(1)
-	target.Lsh(target, 256-uint(Difficulty))
+	target.Lsh(target, 256-uint(BlockDifficulty))
 
 	return target
 }

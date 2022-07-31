@@ -32,9 +32,12 @@ func (chain *ChainManager) String() string {
 
 // AddBlock generates and appends a Block to the chain for a given string data.
 // The generated block is stored in the database. Any error that occurs is returned.
-func (chain *ChainManager) AddBlock(data string) error {
-	// Create a new Block with the given data
-	block := core.NewBlock(data, chain.Head, chain.Height)
+func (chain *ChainManager) AddBlock(txns core.Transactions) error {
+	// Create a new Block with the given transactions
+	block, err := core.NewBlock(txns, chain.Head, chain.Height)
+	if err != nil {
+		return fmt.Errorf("failed to generate block: %w", err)
+	}
 
 	// Serialize the Block
 	blockData, err := block.Serialize()
@@ -126,8 +129,13 @@ func (chain *ChainManager) init() (err error) {
 
 	fmt.Println(">>>> New Blockchain Initialization. Creating Genesis Block <<<<")
 
-	// Create Genesis Block & serialize it
-	genesisBlock := core.NewBlock("genesis", common.NullHash(), 0)
+	// Create Genesis Block
+	genesisBlock, err := core.GenesisBlock()
+	if err != nil {
+		return fmt.Errorf("genesis block generation failed: %w", err)
+	}
+
+	// Serialize the Genesis Block
 	genesisData, err := genesisBlock.Serialize()
 	if err != nil {
 		return fmt.Errorf("block serialize failed: %w", err)
@@ -149,6 +157,7 @@ func (chain *ChainManager) init() (err error) {
 	return nil
 }
 
+// Stop closes the ChainManager's database client
 func (chain *ChainManager) Stop() {
 	chain.db.Close()
 }
