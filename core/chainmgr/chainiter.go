@@ -19,7 +19,7 @@ type ChainIterator struct {
 
 // NewIterator constructs a new ChainIterator for the BlockChain.
 func (chain *ChainManager) NewIterator() *ChainIterator {
-	return &ChainIterator{chain.head, chain.db}
+	return &ChainIterator{chain.Head, chain.db}
 }
 
 // Next returns the next Block in the ChainIterator.

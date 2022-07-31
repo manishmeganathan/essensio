@@ -20,21 +20,21 @@ type ChainManager struct {
 	db *db.Database
 
 	// Represents the hash of the last Block
-	head common.Hash
-	// Represents the height of the chain. Last block height+1
-	height int64
+	Head common.Hash
+	// Represents the Height of the chain. Last block Height+1
+	Height int64
 }
 
 // String implements the Stringer interface for BlockChain
 func (chain *ChainManager) String() string {
-	return fmt.Sprintf("Chain Head: %x || Chain Height: %v", chain.head, chain.height)
+	return fmt.Sprintf("Chain Head: %x || Chain Height: %v", chain.Head, chain.Height)
 }
 
 // AddBlock generates and appends a Block to the chain for a given string data.
 // The generated block is stored in the database. Any error that occurs is returned.
 func (chain *ChainManager) AddBlock(data string) error {
 	// Create a new Block with the given data
-	block := core.NewBlock(data, chain.head, chain.height)
+	block := core.NewBlock(data, chain.Head, chain.Height)
 
 	// Serialize the Block
 	blockData, err := block.Serialize()
@@ -48,8 +48,8 @@ func (chain *ChainManager) AddBlock(data string) error {
 	}
 
 	// Update the chain head with the new block hash and increment chain height
-	chain.head = block.BlockHash
-	chain.height++
+	chain.Head = block.BlockHash
+	chain.Height++
 
 	// Sync the chain state into the DB
 	if err := chain.syncState(); err != nil {
@@ -109,9 +109,9 @@ func (chain *ChainManager) load() (err error) {
 	}
 
 	// Cast the object into an int64 and set it
-	chain.height = *object.(*int64)
+	chain.Height = *object.(*int64)
 	// Convert the head bytes into a Hash and set it
-	chain.head = common.BytesToHash(head)
+	chain.Head = common.BytesToHash(head)
 
 	return nil
 }
@@ -139,7 +139,7 @@ func (chain *ChainManager) init() (err error) {
 	}
 
 	// Set the chain height and head into struct
-	chain.head, chain.height = genesisBlock.BlockHash, 1
+	chain.Head, chain.Height = genesisBlock.BlockHash, 1
 
 	// Sync the chain state into the DB
 	if err := chain.syncState(); err != nil {
@@ -157,12 +157,12 @@ func (chain *ChainManager) Stop() {
 // specified by the ChainHeadKey and ChainHeightKey respectively.
 func (chain *ChainManager) syncState() error {
 	// Sync chain head into the DB
-	if err := chain.db.SetEntry(ChainHeadKey, chain.head.Bytes()); err != nil {
+	if err := chain.db.SetEntry(ChainHeadKey, chain.Head.Bytes()); err != nil {
 		return fmt.Errorf("error syncing chain head: %w", err)
 	}
 
 	// Serialize the chain height
-	height, err := common.GobEncode(chain.height)
+	height, err := common.GobEncode(chain.Height)
 	if err != nil {
 		return fmt.Errorf("error serializing chain height: %w", err)
 	}
