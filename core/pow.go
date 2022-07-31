@@ -42,7 +42,7 @@ func (header *BlockHeader) Mint() common.Hash {
 		hash = common.Hash256(data)
 
 		// Print the hash mining process
-		fmt.Printf("\rMining Block [%v]: %x", header.Nonce, hash)
+		fmt.Printf("\rMining Block [%v]: %v", header.Nonce, hash.Hex())
 
 		// Compare the hash with target
 		if hash.Big().Cmp(header.Target) == -1 {
