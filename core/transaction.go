@@ -2,6 +2,7 @@ package core
 
 import (
 	"bytes"
+	"fmt"
 
 	"github.com/manishmeganathan/essensio/common"
 )
@@ -57,13 +58,13 @@ func (txn *Transaction) Deserialize(data []byte) error {
 }
 
 // Hash returns the SHA-256	hash of the Transaction's serialized representation.
-func (txn *Transaction) Hash() (common.Hash, error) {
+func (txn *Transaction) Hash() common.Hash {
 	data, err := txn.Serialize()
 	if err != nil {
-		return common.NullHash(), err
+		return common.NullHash()
 	}
 
-	return common.Hash256(data), nil
+	return common.Hash256(data)
 }
 
 // GenerateSummary generates a summary hash for a given set of Transactions.
@@ -74,9 +75,9 @@ func GenerateSummary(txns Transactions) (common.Hash, error) {
 	// its hash and append it into the buffer
 	var buffer bytes.Buffer
 	for _, txn := range txns {
-		hash, err := txn.Hash()
-		if err != nil {
-			return common.NullHash(), err
+		hash := txn.Hash()
+		if hash == common.NullHash() {
+			return hash, fmt.Errorf("got null hash")
 		}
 
 		buffer.Write(hash.Bytes())
